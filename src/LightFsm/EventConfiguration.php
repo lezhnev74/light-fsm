@@ -50,7 +50,13 @@ class EventConfiguration
         // make sure the same event was not assigned before
         //
         foreach ($this->transitions as $transition) {
-            if ($transition->getEvent() == $event) {
+            
+            if (
+                $transition->getState() == $state
+                && $transition->getEvent() == $event
+                && $transition->getGuardCallback() == $guardCallback
+                && $transition->getGuardName() == $guardName
+            ) {
                 throw new StateEventDuplication("State [" . $state . "] has already configured reaction on event [" . $event . "]");
             }
         }
