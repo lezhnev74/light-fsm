@@ -11,14 +11,16 @@
 
 namespace LightFsm;
 
+use LightFsm\Exception\StateEventDuplication;
+
 class EventConfiguration
 {
     /** @var string|int */
     private $event;
-
+    
     /** @var TransitionConfiguration[] */
     private $transitions = [];
-
+    
     /**
      * @param string|int $event
      */
@@ -26,7 +28,7 @@ class EventConfiguration
     {
         $this->event = $event;
     }
-
+    
     /**
      * @return int|string
      */
@@ -34,7 +36,7 @@ class EventConfiguration
     {
         return $this->event;
     }
-
+    
     /**
      * @param string|int    $state
      * @param string|int    $event
@@ -44,9 +46,18 @@ class EventConfiguration
      */
     public function addTransition($state, $event, $nextState, $guardCallback = null, $guardName = null)
     {
+        //
+        // make sure the same event was not assigned before
+        //
+        foreach ($this->transitions as $transition) {
+            if ($transition->getEvent() == $event) {
+                throw new StateEventDuplication("State [" . $state . "] has already configured reaction on event [" . $event . "]");
+            }
+        }
+        
         $this->transitions[] = new TransitionConfiguration($state, $event, $nextState, $guardCallback, $guardName);
     }
-
+    
     /**
      * @param mixed $data
      *
@@ -63,10 +74,10 @@ class EventConfiguration
                 return $transition;
             }
         }
-
+        
         return null;
     }
-
+    
     /**
      * @return TransitionConfiguration[]
      */
