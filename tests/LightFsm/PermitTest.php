@@ -22,4 +22,5 @@ class PermitTest extends \PHPUnit_Framework_TestCase
                      ->permit('ev1', 'a');
     }
     
+    
 }
