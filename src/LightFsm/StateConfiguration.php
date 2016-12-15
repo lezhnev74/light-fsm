@@ -148,7 +148,8 @@ class StateConfiguration
     public function triggerEntry($isSubState, $data, StateConfiguration $previousState = null)
     {
         foreach ($this->entryCallbacks as $callback) {
-            call_user_func($callback, $isSubState, $data, $this->state, $previousState);
+            call_user_func($callback, $isSubState, $data, $this->state,
+                $previousState ? $previousState->getState() : null);
         }
     }
     
@@ -160,7 +161,7 @@ class StateConfiguration
     public function triggerExit($isSubState, $data, StateConfiguration $targetState = null)
     {
         foreach ($this->exitCallbacks as $callback) {
-            call_user_func($callback, $isSubState, $data, $this->state, $targetState);
+            call_user_func($callback, $isSubState, $data, $this->state, $targetState ? $targetState->getState() : null);
         }
     }
     
