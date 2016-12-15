@@ -233,9 +233,9 @@ class StateMachine
         
         $isSubState = $this->isSubState($this->_retrieveCurrentState(), $nextState);
         
-        $previousState->triggerExit($isSubState, $data);
+        $previousState->triggerExit($isSubState, $data, $nextState);
         $this->_storeCurrentState($nextState->getState());
-        $nextState->triggerEntry($isSubState, $data);
+        $nextState->triggerEntry($isSubState, $data, $previousState);
     }
     
     /**

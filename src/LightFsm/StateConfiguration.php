@@ -15,21 +15,21 @@ class StateConfiguration
 {
     /** @var string|int */
     private $state;
-
+    
     /**
      * @var EventConfiguration[] event => EventConfiguration
      */
     private $events = [];
-
+    
     /** @var callable[] */
     private $entryCallbacks = [];
-
+    
     /** @var callable[] */
     private $exitCallbacks = [];
-
+    
     /** @var string|int|null */
     private $parentState;
-
+    
     /**
      * @param string|int $state
      */
@@ -37,7 +37,7 @@ class StateConfiguration
     {
         $this->state = $state;
     }
-
+    
     /**
      * @return string|int
      */
@@ -45,7 +45,7 @@ class StateConfiguration
     {
         return $this->state;
     }
-
+    
     /**
      * @param string|int    $event
      * @param string|int    $nextState
@@ -58,10 +58,10 @@ class StateConfiguration
     {
         $eventConfiguration = $this->getEventConfiguration($event);
         $eventConfiguration->addTransition($this->state, $event, $nextState, $guardCallback, $guardName);
-
+        
         return $this;
     }
-
+    
     /**
      * @param string|int $parentState
      *
@@ -70,10 +70,10 @@ class StateConfiguration
     public function subStateOf($parentState)
     {
         $this->parentState = $parentState;
-
+        
         return $this;
     }
-
+    
     /**
      * @return int|string|null
      */
@@ -81,9 +81,9 @@ class StateConfiguration
     {
         return $this->parentState;
     }
-
+    
     /**
-     * @param callable    $callback     f($isSubState, $data, $state)
+     * @param callable    $callback f($isSubState, $data, $state)
      * @param string|null $listenerName
      *
      * @return StateConfiguration
@@ -95,12 +95,12 @@ class StateConfiguration
         } else {
             $this->entryCallbacks[] = $callback;
         }
-
+        
         return $this;
     }
-
+    
     /**
-     * @param callable    $callback     f($isSubState, $data, $state)
+     * @param callable    $callback f($isSubState, $data, $state)
      * @param string|null $listenerName
      *
      * @return StateConfiguration
@@ -112,10 +112,10 @@ class StateConfiguration
         } else {
             $this->exitCallbacks[] = $callback;
         }
-
+        
         return $this;
     }
-
+    
     /**
      * @param string|int $event
      * @param mixed      $data
@@ -126,7 +126,7 @@ class StateConfiguration
     {
         return $this->getEventConfiguration($event)->getTransition($data);
     }
-
+    
     /**
      * @return TransitionConfiguration[]
      */
@@ -136,32 +136,34 @@ class StateConfiguration
         foreach ($this->events as $eventConfiguration) {
             $result = array_merge($result, $eventConfiguration->getAllTransitions());
         }
-
+        
         return $result;
     }
-
+    
     /**
-     * @param bool  $isSubState
-     * @param mixed $data
+     * @param bool               $isSubState
+     * @param mixed              $data
+     * @param StateConfiguration $previousState where we come from
      */
-    public function triggerEntry($isSubState, $data)
+    public function triggerEntry($isSubState, $data, StateConfiguration $previousState = null)
     {
         foreach ($this->entryCallbacks as $callback) {
-            call_user_func($callback, $isSubState, $data, $this->state);
+            call_user_func($callback, $isSubState, $data, $this->state, $previousState);
         }
     }
-
+    
     /**
-     * @param bool  $isSubState
-     * @param mixed $data
+     * @param bool               $isSubState
+     * @param mixed              $data
+     * @param StateConfiguration $targetState where we go to
      */
-    public function triggerExit($isSubState, $data)
+    public function triggerExit($isSubState, $data, StateConfiguration $targetState = null)
     {
         foreach ($this->exitCallbacks as $callback) {
-            call_user_func($callback, $isSubState, $data, $this->state);
+            call_user_func($callback, $isSubState, $data, $this->state, $targetState);
         }
     }
-
+    
     /**
      * @return \callable[]
      */
@@ -169,7 +171,7 @@ class StateConfiguration
     {
         return $this->entryCallbacks;
     }
-
+    
     /**
      * @return \callable[]
      */
@@ -177,7 +179,7 @@ class StateConfiguration
     {
         return $this->exitCallbacks;
     }
-
+    
     /**
      * @param string|int $event
      *
@@ -188,7 +190,7 @@ class StateConfiguration
         if (false === isset($this->events[$event])) {
             $this->events[$event] = new EventConfiguration($event);
         }
-
+        
         return $this->events[$event];
     }
 }
