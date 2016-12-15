@@ -15,12 +15,28 @@ class PermitTest extends \PHPUnit_Framework_TestCase
         // But each event must have different callback
         //
         
-        $this->setExpectedException(StateEventDuplication::class);
+        $this->expectException(StateEventDuplication::class);
         $stateMachine = new StateMachine("a");
         $stateMachine->configure('a')
                      ->permit('ev1', 'b')
                      ->permit('ev1', 'a');
     }
     
+    public function test_will_change_state_on_loop()
+    {
+        //
+        // Note: each state actually can have multiple events to react on
+        // But each event must have different callback
+        //
+        
+        $stateMachine = new StateMachine("a", null, true);
+        $stateMachine->configure('a')
+                     ->onEntry(function () {
+                         echo "Entry A";
+                     })
+                     ->permit('ev2', 'a');
+        
+        $stateMachine->fire("ev2");
+    }
     
 }
